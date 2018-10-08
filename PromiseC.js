@@ -1,6 +1,5 @@
 /**
- * 执行 then 方法, 将then 中的 onFulFilled/onRejected 函数存在相应数组中。
- * 等待构造函数中 执行 resolve/reject 改变 promise 状态, 并执行对应数组中的 onFulFilled/onRejected
+ * then 方法返回值用 Promise 包裹, 每次调用都返回 Promise
  */
 
 /** 链式调用 */
@@ -33,8 +32,16 @@ class PromiseC {
   then(onFulfilled, onRejected) {
     let nextPromise;
     if (this.status === "pending") {
-      this.onFulFilledArr.push(onFulfilled);
-      this.onRejectedArr.push(onRejected);
+      nextPromise = new PromiseC((resolve, reject) => {
+        this.onFulFilledArr.push(_ => {
+          const tmp = onFulfilled(this.value);
+          resolve(tmp);
+        });
+        this.onRejectedArr.push(_ => {
+          const tmp = onRejected(this.value);
+          reject(tmp);
+        });
+      });
     }
     if (this.status === "resolved") {
       nextPromise = new PromiseC((resolve, reject) => {
@@ -60,17 +67,19 @@ class PromiseC {
   }
 }
 
-// new PromiseC((resolve, reject) => {
-//   console.log("start");
-//   setTimeout(() => {
-//     resolve(1);
-//   }, 1001);
-// }).then(val => console.log(val));
-
 new PromiseC((resolve, reject) => {
-  console.log("start");
   setTimeout(() => {
     resolve(1);
   }, 1000);
-}).then(val => console.log(val));
-  .then(val => console.log(val));
+})
+  .then(val => {
+    console.log(val);
+    return 2;
+  })
+  .then(val => {
+    console.log(val);
+    return 3;
+  })
+  .then(val => {
+    console.log(val);
+  });
