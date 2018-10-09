@@ -1,4 +1,5 @@
 /**
+ * 链式调用
  * then 方法返回值用 Promise 包裹, 每次调用都返回 Promise
  */
 
